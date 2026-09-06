@@ -383,7 +383,7 @@ export default function EventDetail() {
   const [userLocationLabel, setUserLocationLabel] = useState<string>(() => readStoredValue('matchday-sa-location-label', ''));
   const [manualLocation, setManualLocation] = useState<string>('');
   const [locationError, setLocationError] = useState<string>('');
-  const [locationStatus, setLocationStatus] = useState<'idle' | 'granted' | 'denied' | 'unsupported'>('idle');
+  const [locationStatus, setLocationStatus] = useState<'idle' | 'locating' | 'granted' | 'denied' | 'unsupported'>('idle');
   const [includeTicket, setIncludeTicket] = useState(false);
   const [passengers, setPassengers] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState<'full' | 'bnpl'>('full');
@@ -554,11 +554,14 @@ export default function EventDetail() {
   };
 
   const handleUseCurrentLocation = () => {
-    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+    if (typeof window === 'undefined' || !window.isSecureContext || !navigator.geolocation) {
       setLocationStatus('unsupported');
-      setLocationError('Location access is not available in this browser. Please use your suburb or address instead.');
+      setLocationError('Location access requires a secure connection. Please use your suburb or address instead.');
       return;
     }
+
+    setLocationStatus('locating');
+    setLocationError('');
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
@@ -568,14 +571,15 @@ export default function EventDetail() {
         setLocationError('');
       },
       (error) => {
-        setLocationStatus('denied');
-        setLocationError(
-          error.code === 1
-            ? 'Location permission was denied. Please enter your suburb or address to continue.'
-            : 'Your browser could not share a location. Choose your province below to see the closest pickup routes immediately.',
-        );
+        const permissionDenied = error.code === 1;
+        setLocationStatus(permissionDenied ? 'denied' : 'unsupported');
+        setLocationError(permissionDenied
+          ? 'Location permission was denied. Allow location access in your browser settings, then try again.'
+          : error.code === 3
+            ? 'Location lookup timed out. Check your device location setting and try again, or enter your suburb/address.'
+            : 'Your device could not determine a location. Try again or enter your suburb/address.');
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 600000 },
+      { enableHighAccuracy: false, timeout: 20000, maximumAge: 300000 },
     );
   };
 
@@ -870,10 +874,11 @@ export default function EventDetail() {
                       <button
                         type="button"
                         onClick={handleUseCurrentLocation}
-                        className="inline-flex items-center gap-2 rounded-full border border-gold-500/40 bg-gold-500/10 px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-gold-500 transition-colors hover:bg-gold-500/20"
+                        disabled={locationStatus === 'locating'}
+                        className="inline-flex items-center gap-2 rounded-full border border-gold-500/40 bg-gold-500/10 px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-gold-500 transition-colors hover:bg-gold-500/20 disabled:cursor-wait disabled:opacity-60"
                       >
                         <MapPin className="h-3.5 w-3.5" />
-                        Add my location
+                        {locationStatus === 'locating' ? 'Locating...' : 'Add my location'}
                       </button>
                     </div>
 
@@ -949,9 +954,10 @@ export default function EventDetail() {
                         <button
                           type="button"
                           onClick={handleUseCurrentLocation}
-                          className="rounded-xl border border-gold-500/40 bg-black/20 px-3 py-2 text-sm font-medium text-gold-500 transition-colors hover:bg-gold-500/10"
+                          disabled={locationStatus === 'locating'}
+                          className="rounded-xl border border-gold-500/40 bg-black/20 px-3 py-2 text-sm font-medium text-gold-500 transition-colors hover:bg-gold-500/10 disabled:cursor-wait disabled:opacity-60"
                         >
-                          {userLocationLabel ? 'Update my location' : 'Use my location'}
+                          {locationStatus === 'locating' ? 'Locating...' : userLocationLabel ? 'Update my location' : 'Use my location'}
                         </button>
                       </div>
                     }
