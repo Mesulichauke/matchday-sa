@@ -131,6 +131,8 @@ export default function Football() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                 <input
+                  id="football-search"
+                  name="search"
                   type="text"
                   placeholder="Search teams, venues..."
                   value={searchQuery}
@@ -142,6 +144,8 @@ export default function Football() {
 
             <div className="min-w-[150px]">
               <select
+                id="football-type"
+                name="type"
                 value={selectedType}
                 onChange={(event) => setSelectedType(event.target.value)}
                 className="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white focus:border-gold-500 focus:outline-none"
@@ -156,6 +160,8 @@ export default function Football() {
 
             <div className="min-w-[150px]">
               <select
+                id="football-team"
+                name="team"
                 value={selectedTeam}
                 onChange={(event) => setSelectedTeam(event.target.value)}
                 className="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white focus:border-gold-500 focus:outline-none"

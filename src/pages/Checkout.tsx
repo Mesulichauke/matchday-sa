@@ -173,19 +173,19 @@ export default function Checkout() {
               <div className="grid gap-4 md:grid-cols-2">
                 <label className="block text-sm font-medium text-slate-700">
                   Full name
-                  <input value={customerName} onChange={(event) => setCustomerName(event.target.value)} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 outline-none transition focus:border-[#1A8A3F]" placeholder="John Smith" />
+                  <input id="customer-name" name="customerName" value={customerName} onChange={(event) => setCustomerName(event.target.value)} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 outline-none transition focus:border-[#1A8A3F]" placeholder="John Smith" />
                 </label>
                 <label className="block text-sm font-medium text-slate-700">
                   Email
-                  <input type="email" value={customerEmail} onChange={(event) => setCustomerEmail(event.target.value)} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 outline-none transition focus:border-[#1A8A3F]" placeholder="you@example.com" />
+                  <input id="customer-email" name="email" type="email" value={customerEmail} onChange={(event) => setCustomerEmail(event.target.value)} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 outline-none transition focus:border-[#1A8A3F]" placeholder="you@example.com" />
                 </label>
                 <label className="block text-sm font-medium text-slate-700 md:col-span-2">
                   Phone number
-                  <input value={customerPhone} onChange={(event) => setCustomerPhone(event.target.value)} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 outline-none transition focus:border-[#1A8A3F]" placeholder="+27 82 123 4567" />
+                  <input id="customer-phone" name="phone" value={customerPhone} onChange={(event) => setCustomerPhone(event.target.value)} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 outline-none transition focus:border-[#1A8A3F]" placeholder="+27 82 123 4567" />
                 </label>
                 <label className="block text-sm font-medium text-slate-700 md:col-span-2">
                   Notes
-                  <textarea value={notes} onChange={(event) => setNotes(event.target.value)} rows={3} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 outline-none transition focus:border-[#1A8A3F]" placeholder="Any special requests, group notes, or contact preferences" />
+                  <textarea id="booking-notes" name="notes" value={notes} onChange={(event) => setNotes(event.target.value)} rows={3} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 outline-none transition focus:border-[#1A8A3F]" placeholder="Any special requests, group notes, or contact preferences" />
                 </label>
               </div>
             </div>
@@ -213,7 +213,7 @@ export default function Checkout() {
             </div>
 
             <label className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
-              <input type="checkbox" checked={acceptedTerms} onChange={(event) => setAcceptedTerms(event.target.checked)} className="mt-1 h-4 w-4" />
+              <input id="accepted-terms" name="acceptedTerms" type="checkbox" checked={acceptedTerms} onChange={(event) => setAcceptedTerms(event.target.checked)} className="mt-1 h-4 w-4" />
               <span>I agree to the <Link to="/info/terms" className="font-semibold text-[#1A8A3F] underline">booking terms</Link> and acknowledge the <Link to="/info/privacy" className="font-semibold text-[#1A8A3F] underline">privacy notice</Link>.</span>
             </label>
           </div>

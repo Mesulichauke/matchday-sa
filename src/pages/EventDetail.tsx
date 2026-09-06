@@ -920,6 +920,8 @@ export default function EventDetail() {
 
                         <div className="mb-3 flex flex-col gap-2 sm:flex-row">
                           <input
+                            id="manual-location"
+                            name="manualLocation"
                             type="text"
                             value={manualLocation}
                             onChange={(event) => setManualLocation(event.target.value)}
@@ -937,6 +939,8 @@ export default function EventDetail() {
 
                         <div className="mb-3 flex flex-col gap-2 sm:flex-row">
                           <select
+                            id="user-province"
+                            name="province"
                             value={userProvince ?? ''}
                             onChange={(event) => {
                               const province = event.target.value;
@@ -969,6 +973,8 @@ export default function EventDetail() {
                           <p className="mt-1 text-sm text-gray-300">Choose a region to narrow the pickup list.</p>
                         </div>
                         <select
+                          id="pickup-province-filter"
+                          name="pickupProvinceFilter"
                           value={pickupProvinceFilter}
                           onChange={(event) => setPickupProvinceFilter(event.target.value)}
                           className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-gold-500 sm:max-w-[220px]"

@@ -304,16 +304,20 @@ export default function Admin() {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <label className="mb-2 block text-sm text-gray-300">Hero title</label>
+                  <label htmlFor="admin-hero-title" className="mb-2 block text-sm text-gray-300">Hero title</label>
                   <input
+                    id="admin-hero-title"
+                    name="heroTitle"
                     value={siteSettings.heroTitle}
                     onChange={(event) => setSiteSettings((current) => ({ ...current, heroTitle: event.target.value }))}
                     className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white outline-none focus:border-gold-500"
                   />
                 </div>
                 <div>
-                  <label className="mb-2 block text-sm text-gray-300">Hero subtitle</label>
+                  <label htmlFor="admin-hero-subtitle" className="mb-2 block text-sm text-gray-300">Hero subtitle</label>
                   <input
+                    id="admin-hero-subtitle"
+                    name="heroSubtitle"
                     value={siteSettings.heroSubtitle}
                     onChange={(event) => setSiteSettings((current) => ({ ...current, heroSubtitle: event.target.value }))}
                     className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white outline-none focus:border-gold-500"
@@ -322,8 +326,10 @@ export default function Admin() {
               </div>
 
               <div className="mt-4">
-                <label className="mb-2 block text-sm text-gray-300">Booking note</label>
+                <label htmlFor="admin-booking-note" className="mb-2 block text-sm text-gray-300">Booking note</label>
                 <textarea
+                  id="admin-booking-note"
+                  name="bookingText"
                   value={siteSettings.bookingText}
                   onChange={(event) => setSiteSettings((current) => ({ ...current, bookingText: event.target.value }))}
                   rows={3}
@@ -350,8 +356,10 @@ export default function Admin() {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <label className="mb-2 block text-sm text-gray-300">Title</label>
+                  <label htmlFor="package-title" className="mb-2 block text-sm text-gray-300">Title</label>
                   <input
+                    id="package-title"
+                    name="title"
                     value={packageDraft.title}
                     onChange={(event) => setPackageDraft((current) => ({ ...current, title: event.target.value }))}
                     className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white outline-none focus:border-gold-500"
@@ -359,8 +367,10 @@ export default function Admin() {
                   />
                 </div>
                 <div>
-                  <label className="mb-2 block text-sm text-gray-300">Category</label>
+                  <label htmlFor="package-category" className="mb-2 block text-sm text-gray-300">Category</label>
                   <select
+                    id="package-category"
+                    name="category"
                     value={packageDraft.category}
                     onChange={(event) => setPackageDraft((current) => ({ ...current, category: event.target.value as PackageCategory }))}
                     className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white outline-none focus:border-gold-500"
@@ -374,8 +384,10 @@ export default function Admin() {
                   </select>
                 </div>
                 <div>
-                  <label className="mb-2 block text-sm text-gray-300">Price</label>
+                  <label htmlFor="package-price" className="mb-2 block text-sm text-gray-300">Price</label>
                   <input
+                    id="package-price"
+                    name="price"
                     type="number"
                     value={packageDraft.price}
                     onChange={(event) => setPackageDraft((current) => ({ ...current, price: Number(event.target.value) || 0 }))}
@@ -383,8 +395,10 @@ export default function Admin() {
                   />
                 </div>
                 <div>
-                  <label className="mb-2 block text-sm text-gray-300">Format</label>
+                  <label htmlFor="package-format" className="mb-2 block text-sm text-gray-300">Format</label>
                   <input
+                    id="package-format"
+                    name="format"
                     value={packageDraft.format}
                     onChange={(event) => setPackageDraft((current) => ({ ...current, format: event.target.value }))}
                     className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white outline-none focus:border-gold-500"
@@ -394,8 +408,10 @@ export default function Admin() {
               </div>
 
               <div className="mt-4">
-                <label className="mb-2 block text-sm text-gray-300">Description</label>
+                <label htmlFor="package-description" className="mb-2 block text-sm text-gray-300">Description</label>
                 <textarea
+                  id="package-description"
+                  name="description"
                   value={packageDraft.description}
                   onChange={(event) => setPackageDraft((current) => ({ ...current, description: event.target.value }))}
                   rows={3}
@@ -404,8 +420,10 @@ export default function Admin() {
               </div>
 
               <div className="mt-4">
-                <label className="mb-2 block text-sm text-gray-300">Includes (comma-separated)</label>
+                <label htmlFor="package-includes" className="mb-2 block text-sm text-gray-300">Includes (comma-separated)</label>
                 <input
+                  id="package-includes"
+                  name="includes"
                   value={packageDraft.includes.join(', ')}
                   onChange={(event) => setPackageDraft((current) => ({ ...current, includes: event.target.value.split(',').map((item) => item.trim()).filter(Boolean) }))}
                   className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white outline-none focus:border-gold-500"
@@ -414,12 +432,14 @@ export default function Admin() {
 
               <div className="mt-4 flex items-center gap-3">
                 <input
+                  id="package-active"
+                  name="active"
                   type="checkbox"
                   checked={packageDraft.active}
                   onChange={(event) => setPackageDraft((current) => ({ ...current, active: event.target.checked }))}
                   className="h-4 w-4 rounded border-white/20 bg-black text-gold-500"
                 />
-                <label className="text-sm text-gray-300">Active package</label>
+                <label htmlFor="package-active" className="text-sm text-gray-300">Active package</label>
               </div>
 
               <button
@@ -450,8 +470,10 @@ export default function Admin() {
 
               <div className="grid gap-4">
                 <div>
-                  <label className="mb-2 block text-sm text-gray-300">Name</label>
+                  <label htmlFor="pickup-name" className="mb-2 block text-sm text-gray-300">Name</label>
                   <input
+                    id="pickup-name"
+                    name="name"
                     value={pickupDraft.name}
                     onChange={(event) => setPickupDraft((current) => ({ ...current, name: event.target.value }))}
                     className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white outline-none focus:border-gold-500"
@@ -459,16 +481,20 @@ export default function Admin() {
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div>
-                    <label className="mb-2 block text-sm text-gray-300">City</label>
+                    <label htmlFor="pickup-city" className="mb-2 block text-sm text-gray-300">City</label>
                     <input
+                      id="pickup-city"
+                      name="city"
                       value={pickupDraft.city}
                       onChange={(event) => setPickupDraft((current) => ({ ...current, city: event.target.value }))}
                       className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white outline-none focus:border-gold-500"
                     />
                   </div>
                   <div>
-                    <label className="mb-2 block text-sm text-gray-300">Province</label>
+                    <label htmlFor="pickup-province" className="mb-2 block text-sm text-gray-300">Province</label>
                     <select
+                      id="pickup-province"
+                      name="province"
                       value={pickupDraft.province}
                       onChange={(event) => setPickupDraft((current) => ({ ...current, province: event.target.value }))}
                       className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white outline-none focus:border-gold-500"
@@ -481,8 +507,10 @@ export default function Admin() {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm text-gray-300">Zone</label>
+                  <label htmlFor="pickup-zone" className="mb-2 block text-sm text-gray-300">Zone</label>
                   <select
+                    id="pickup-zone"
+                    name="zone"
                     value={pickupDraft.zone}
                     onChange={(event) => setPickupDraft((current) => ({ ...current, zone: event.target.value }))}
                     className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white outline-none focus:border-gold-500"
@@ -496,8 +524,10 @@ export default function Admin() {
                   </select>
                 </div>
                 <div>
-                  <label className="mb-2 block text-sm text-gray-300">Address</label>
+                  <label htmlFor="pickup-address" className="mb-2 block text-sm text-gray-300">Address</label>
                   <input
+                    id="pickup-address"
+                    name="address"
                     value={pickupDraft.address}
                     onChange={(event) => setPickupDraft((current) => ({ ...current, address: event.target.value }))}
                     className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-white outline-none focus:border-gold-500"
@@ -505,12 +535,14 @@ export default function Admin() {
                 </div>
                 <div className="flex items-center gap-3">
                   <input
+                    id="pickup-active"
+                    name="active"
                     type="checkbox"
                     checked={pickupDraft.active}
                     onChange={(event) => setPickupDraft((current) => ({ ...current, active: event.target.checked }))}
                     className="h-4 w-4 rounded border-white/20 bg-black text-gold-500"
                   />
-                  <label className="text-sm text-gray-300">Active pickup point</label>
+                  <label htmlFor="pickup-active" className="text-sm text-gray-300">Active pickup point</label>
                 </div>
 
                 <button

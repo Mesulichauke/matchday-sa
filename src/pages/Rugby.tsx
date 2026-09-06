@@ -27,6 +27,8 @@ export default function Rugby() {
           <div className="flex w-full max-w-md items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-3">
             <Search className="h-4 w-4 text-gray-400" />
             <input
+              id="rugby-search"
+              name="search"
               type="text"
               placeholder="Search teams, venues, or events..."
               value={searchQuery}
