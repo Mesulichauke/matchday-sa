@@ -313,7 +313,7 @@ export default function Landing() {
             className="absolute inset-0 bg-cover bg-center"
             style={{
               backgroundImage:
-                "linear-gradient(90deg, rgba(10,13,15,0.8), rgba(10,13,15,0.45)), url('https://images.unsplash.com/photo-1547347298-4074fc3086f0?auto=format&fit=crop&w=1800&q=80')",
+                "linear-gradient(90deg, rgba(7,10,12,0.94) 0%, rgba(7,10,12,0.7) 42%, rgba(16,74,42,0.36) 100%), radial-gradient(circle at top right, rgba(255,215,0,0.18), transparent 34%), url('https://images.unsplash.com/photo-1473976345543-9ffc928e648d?auto=format&fit=crop&w=2200&q=85')",
             }}
           />
 
@@ -538,6 +538,8 @@ export default function Landing() {
                   <div className="flex items-center gap-3 rounded-xl bg-white px-3 py-3 text-slate-700">
                     <MapPin className="h-4 w-4 text-slate-500" />
                     <input
+                      id="trip-from"
+                      name="fromLocation"
                       value={fromLocation}
                       onChange={(event) => setFromLocation(event.target.value)}
                       className="w-full border-none bg-transparent text-sm outline-none placeholder:text-slate-400"
@@ -551,6 +553,8 @@ export default function Landing() {
                   <div className="flex items-center gap-3 rounded-xl bg-white px-3 py-3 text-slate-700">
                     <MapPin className="h-4 w-4 text-slate-500" />
                     <input
+                      id="trip-to"
+                      name="toLocation"
                       value={toLocation}
                       onChange={(event) => setToLocation(event.target.value)}
                       className="w-full border-none bg-transparent text-sm outline-none placeholder:text-slate-400"
@@ -563,6 +567,8 @@ export default function Landing() {
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
                     <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-white/70">Depart</label>
                     <input
+                      id="depart-date"
+                      name="departDate"
                       type="date"
                       value={departDate}
                       onChange={(event) => setDepartDate(event.target.value)}
@@ -572,6 +578,8 @@ export default function Landing() {
                   <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
                     <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.16em] text-white/70">Return</label>
                     <input
+                      id="return-date"
+                      name="returnDate"
                       type="date"
                       value={returnDate}
                       onChange={(event) => setReturnDate(event.target.value)}

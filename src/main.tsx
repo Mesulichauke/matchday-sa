@@ -8,6 +8,29 @@ import { convex } from './lib/convex';
 import './index.css';
 
 const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY?.trim();
+const spaRedirectKey = 'matchday-spa-redirect';
+
+const pendingRedirect = sessionStorage.getItem(spaRedirectKey);
+
+if (pendingRedirect) {
+  sessionStorage.removeItem(spaRedirectKey);
+
+  const redirect = JSON.parse(pendingRedirect) as {
+    path?: string;
+    search?: string;
+    hash?: string;
+  };
+
+  const targetPath = redirect.path ?? '/';
+  const targetSearch = redirect.search ?? '';
+  const targetHash = redirect.hash ?? '';
+
+  window.history.replaceState(
+    {},
+    '',
+    `${import.meta.env.BASE_URL.replace(/\/$/, '')}${targetPath}${targetSearch}${targetHash}`,
+  );
+}
 
 class AppErrorBoundary extends React.Component<
   { children: React.ReactNode },
