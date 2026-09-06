@@ -18,10 +18,26 @@ export default function Rugby() {
   return (
     <Layout>
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <section
+          className="relative mb-10 overflow-hidden rounded-[32px] border border-white/10 bg-[#0c1014] text-white shadow-2xl"
+          style={{
+            backgroundImage: `linear-gradient(90deg, rgba(7,10,12,0.92) 0%, rgba(7,10,12,0.68) 44%, rgba(16,74,42,0.3) 100%), url('${import.meta.env.BASE_URL}images/rugby-matchday-hero.jpg')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          <div className="max-w-3xl px-6 py-14 sm:px-10 sm:py-16">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[#FFD700]">Rugby matchdays</p>
+            <h1 className="mt-3 text-4xl font-black tracking-[-0.04em] sm:text-5xl">Feel the roar with the crowd.</h1>
+            <p className="mt-4 max-w-2xl text-lg text-white/85">
+              Full township transport, local culture, and stadium-ready support for every big rugby weekend.
+            </p>
+          </div>
+        </section>
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="text-sm uppercase tracking-[0.2em] text-gold-500">Rugby</p>
-            <h1 className="mt-2 text-4xl font-bold">Rugby Matchdays</h1>
+            <h2 className="mt-2 text-2xl font-bold">Browse upcoming fixtures</h2>
             <p className="mt-2 text-gray-400">Feel the roar with full township transport and local culture.</p>
           </div>
           <div className="flex w-full max-w-md items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-3">

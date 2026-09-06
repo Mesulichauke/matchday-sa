@@ -6,7 +6,7 @@ import { townshipTours } from '@/data/townshipTours';
 
 const provinces = ['All Provinces', 'Gauteng', 'Limpopo', 'Mpumalanga', 'North West', 'Free State', 'KZN'];
 const townshipHeroBackground =
-  "linear-gradient(90deg, rgba(7,10,12,0.92) 0%, rgba(7,10,12,0.72) 44%, rgba(16,74,42,0.42) 100%), radial-gradient(circle at top right, rgba(255,215,0,0.18), transparent 34%), url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=2200&q=85')";
+  `linear-gradient(90deg, rgba(7,10,12,0.92) 0%, rgba(7,10,12,0.72) 44%, rgba(16,74,42,0.42) 100%), radial-gradient(circle at top right, rgba(255,215,0,0.18), transparent 34%), url('${import.meta.env.BASE_URL}images/township-tours-hero.jpg')`;
 
 export default function Tours() {
   const [searchQuery, setSearchQuery] = useState('');

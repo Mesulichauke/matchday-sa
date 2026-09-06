@@ -56,7 +56,7 @@ export const create = mutation({
       .withIndex("by_trip_group", (q) => q.eq("tripGroupId", tripGroupId))
       .collect();
     const reservedSeats = existingBookings
-      .filter((booking) => booking.status !== "cancelled")
+      .filter((booking) => booking.status !== "cancelled" && booking.status !== "declined")
       .reduce((total, booking) => total + booking.passengerCount, 0);
 
     if (reservedSeats + args.passengerCount > 18) {
@@ -80,12 +80,94 @@ export const updateStatus = mutation({
     status: v.union(
       v.literal("pending"),
       v.literal("confirmed"),
+      v.literal("approved"),
       v.literal("paid"),
       v.literal("cancelled"),
+      v.literal("declined"),
     ),
   },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.id, { status: args.status });
+    return args.id;
+  },
+});
+
+export const update = mutation({
+  args: {
+    id: v.id("bookings"),
+    customerName: v.optional(v.string()),
+    customerEmail: v.optional(v.string()),
+    customerPhone: v.optional(v.string()),
+    passengerCount: v.optional(v.number()),
+    matchDate: v.optional(v.string()),
+    pickupName: v.optional(v.string()),
+    pickupAddress: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    totalPrice: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const { id, ...changes } = args;
+    const booking = await ctx.db.get(id);
+    if (!booking) throw new Error("Booking not found.");
+    await ctx.db.patch(id, changes);
+    return id;
+  },
+});
+
+export const assignItinerary = mutation({
+  args: {
+    bookingId: v.id("bookings"),
+    templateId: v.optional(v.id("itineraryTemplates")),
+    itinerary: v.array(v.object({
+      time: v.string(),
+      title: v.string(),
+      location: v.string(),
+      notes: v.optional(v.string()),
+    })),
+  },
+  handler: async (ctx, args) => {
+    const booking = await ctx.db.get(args.bookingId);
+    if (!booking) throw new Error("Booking not found.");
+    await ctx.db.patch(args.bookingId, {
+      itineraryTemplateId: args.templateId,
+      itinerary: args.itinerary,
+    });
+    return args.bookingId;
+  },
+});
+
+export const listItineraryTemplates = query({
+  args: {},
+  handler: async (ctx) => ctx.db.query("itineraryTemplates").withIndex("by_updated_at").order("desc").collect(),
+});
+
+export const saveItineraryTemplate = mutation({
+  args: {
+    id: v.optional(v.id("itineraryTemplates")),
+    name: v.string(),
+    description: v.string(),
+    items: v.array(v.object({
+      time: v.string(),
+      title: v.string(),
+      location: v.string(),
+      notes: v.optional(v.string()),
+    })),
+    active: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const { id, ...template } = args;
+    if (id) {
+      await ctx.db.patch(id, { ...template, updatedAt: Date.now() });
+      return id;
+    }
+    return ctx.db.insert("itineraryTemplates", { ...template, updatedAt: Date.now() });
+  },
+});
+
+export const deleteItineraryTemplate = mutation({
+  args: { id: v.id("itineraryTemplates") },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.id);
     return args.id;
   },
 });

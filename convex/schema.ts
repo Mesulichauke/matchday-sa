@@ -18,6 +18,13 @@ export default defineSchema({
     pickupZone: v.string(),
     tripGroupId: v.optional(v.string()),
     tripRegions: v.optional(v.array(v.string())),
+    itineraryTemplateId: v.optional(v.id("itineraryTemplates")),
+    itinerary: v.optional(v.array(v.object({
+      time: v.string(),
+      title: v.string(),
+      location: v.string(),
+      notes: v.optional(v.string()),
+    }))),
     passengerCount: v.number(),
     includeTicket: v.boolean(),
     ticketTotal: v.number(),
@@ -30,8 +37,10 @@ export default defineSchema({
     status: v.union(
       v.literal("pending"),
       v.literal("confirmed"),
+      v.literal("approved"),
       v.literal("paid"),
       v.literal("cancelled"),
+      v.literal("declined"),
     ),
     createdAt: v.number(),
   })
@@ -39,4 +48,16 @@ export default defineSchema({
     .index("by_status", ["status"])
     .index("by_match_package", ["matchId", "packageId"])
     .index("by_trip_group", ["tripGroupId"]),
+  itineraryTemplates: defineTable({
+    name: v.string(),
+    description: v.string(),
+    items: v.array(v.object({
+      time: v.string(),
+      title: v.string(),
+      location: v.string(),
+      notes: v.optional(v.string()),
+    })),
+    active: v.boolean(),
+    updatedAt: v.number(),
+  }).index("by_updated_at", ["updatedAt"]),
 });

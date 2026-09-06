@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useMutation, useQuery } from 'convex/react';
 import { RedirectToSignIn, useUser } from '@clerk/clerk-react';
-import { ArrowLeft, Plus, Save, Trash2, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Check, Edit3, Plus, Save, Trash2, ShieldCheck, X, Route } from 'lucide-react';
 import { api } from '../../convex/_generated/api';
+import type { Id } from '../../convex/_generated/dataModel';
 import { defaultPickupPoints, mergePickupPoints, type PickupPoint } from '@/data/pickupPoints';
 
 type PackageCategory = 'home' | 'away' | 'neutral' | 'camping' | 'viewing' | 'season';
@@ -25,6 +26,29 @@ type SiteSettings = {
   heroTitle: string;
   heroSubtitle: string;
   bookingText: string;
+};
+
+type ItineraryItem = {
+  time: string;
+  title: string;
+  location: string;
+  notes?: string;
+};
+
+type ItineraryDraft = {
+  id?: Id<'itineraryTemplates'>;
+  name: string;
+  description: string;
+  items: ItineraryItem[];
+  active: boolean;
+};
+
+const emptyItineraryItem: ItineraryItem = { time: '09:00', title: '', location: '', notes: '' };
+const emptyItinerary: ItineraryDraft = {
+  name: '',
+  description: '',
+  items: [emptyItineraryItem],
+  active: true,
 };
 
 const defaultPackages: PackageEntry[] = [
@@ -102,11 +126,30 @@ export default function Admin() {
   const { isLoaded, isSignedIn, user } = useUser();
   const bookings = useQuery(api.bookings.list, {});
   const updateBookingStatus = useMutation(api.bookings.updateStatus);
+  const updateBooking = useMutation(api.bookings.update);
+  const assignItinerary = useMutation(api.bookings.assignItinerary);
+  const itineraryTemplates = useQuery(api.bookings.listItineraryTemplates, {});
+  const saveItineraryTemplate = useMutation(api.bookings.saveItineraryTemplate);
+  const deleteItineraryTemplate = useMutation(api.bookings.deleteItineraryTemplate);
   const [packages, setPackages] = useState<PackageEntry[]>(() => readStoredValue('matchday-sa-packages', defaultPackages));
   const [pickups, setPickups] = useState<PickupEntry[]>(() => mergePickupPoints(readStoredValue('matchday-sa-pickups', defaultPickups)));
   const [siteSettings, setSiteSettings] = useState<SiteSettings>(() => readStoredValue('matchday-sa-site-settings', defaultSiteSettings));
   const [packageDraft, setPackageDraft] = useState<PackageEntry>(emptyPackage);
   const [pickupDraft, setPickupDraft] = useState<PickupEntry>(emptyPickup);
+  const [itineraryDraft, setItineraryDraft] = useState<ItineraryDraft>(emptyItinerary);
+  const [bookingFilter, setBookingFilter] = useState<'all' | 'pending' | 'approved' | 'paid' | 'declined'>('all');
+  const [editingBookingId, setEditingBookingId] = useState<Id<'bookings'> | null>(null);
+  const [bookingDraft, setBookingDraft] = useState({
+    customerName: '',
+    customerEmail: '',
+    customerPhone: '',
+    passengerCount: 1,
+    matchDate: '',
+    pickupName: '',
+    pickupAddress: '',
+    notes: '',
+    totalPrice: 0,
+  });
 
   useEffect(() => {
     localStorage.setItem('matchday-sa-packages', JSON.stringify(packages));
@@ -137,8 +180,46 @@ export default function Admin() {
     };
   }, [bookings]);
 
-  const handleBookingStatus = async (id: typeof bookings extends (infer T)[] | undefined ? T extends { _id: infer I } ? I : never : never, status: 'confirmed' | 'paid' | 'cancelled') => {
+  const filteredBookings = useMemo(() => {
+    const entries = bookings ?? [];
+    return bookingFilter === 'all' ? entries : entries.filter((booking) => booking.status === bookingFilter);
+  }, [bookingFilter, bookings]);
+
+  const handleBookingStatus = async (id: Id<'bookings'>, status: 'confirmed' | 'approved' | 'paid' | 'cancelled' | 'declined') => {
     await updateBookingStatus({ id, status });
+  };
+
+  const startBookingEdit = (booking: NonNullable<typeof bookings>[number]) => {
+    setEditingBookingId(booking._id);
+    setBookingDraft({
+      customerName: booking.customerName,
+      customerEmail: booking.customerEmail,
+      customerPhone: booking.customerPhone,
+      passengerCount: booking.passengerCount,
+      matchDate: booking.matchDate,
+      pickupName: booking.pickupName,
+      pickupAddress: booking.pickupAddress,
+      notes: booking.notes ?? '',
+      totalPrice: booking.totalPrice,
+    });
+  };
+
+  const saveBookingEdit = async () => {
+    if (!editingBookingId) return;
+    await updateBooking({ id: editingBookingId, ...bookingDraft, passengerCount: Math.max(1, bookingDraft.passengerCount), totalPrice: Math.max(0, bookingDraft.totalPrice) });
+    setEditingBookingId(null);
+  };
+
+  const saveItinerary = async () => {
+    if (!itineraryDraft.name.trim() || !itineraryDraft.items.some((item) => item.title.trim())) return;
+    await saveItineraryTemplate({
+      id: itineraryDraft.id,
+      name: itineraryDraft.name.trim(),
+      description: itineraryDraft.description.trim(),
+      items: itineraryDraft.items.filter((item) => item.title.trim()).map((item) => ({ ...item, title: item.title.trim(), location: item.location.trim(), notes: item.notes?.trim() || undefined })),
+      active: itineraryDraft.active,
+    });
+    setItineraryDraft(emptyItinerary);
   };
 
   const resetToDefaults = () => {
@@ -291,6 +372,151 @@ export default function Admin() {
             <p className="mt-2 text-3xl font-bold text-gold-500">R{packageSummary.revenue.toLocaleString()}</p>
           </div>
         </div>
+
+        <section className="rounded-3xl border border-white/10 bg-white/5 p-6">
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold-500">Operations</p>
+              <h2 className="mt-2 text-2xl font-bold">Booking approval queue</h2>
+              <p className="mt-1 text-sm text-gray-400">Review customer details, approve or decline requests, and update trip arrangements.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {(['all', 'pending', 'approved', 'paid', 'declined'] as const).map((filter) => (
+                <button
+                  key={filter}
+                  type="button"
+                  onClick={() => setBookingFilter(filter)}
+                  className={`rounded-full px-3 py-1.5 text-xs font-semibold capitalize ${bookingFilter === filter ? 'bg-gold-500 text-black' : 'border border-white/10 bg-black/20 text-gray-300'}`}
+                >
+                  {filter}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {filteredBookings.map((booking) => (
+              <div key={booking._id} className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                {editingBookingId === booking._id ? (
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {[
+                      ['customerName', 'Customer name'],
+                      ['customerEmail', 'Email'],
+                      ['customerPhone', 'Phone'],
+                      ['matchDate', 'Match date'],
+                      ['pickupName', 'Pickup point'],
+                      ['pickupAddress', 'Pickup address'],
+                    ].map(([key, label]) => (
+                      <label key={key} className="text-xs text-gray-400">
+                        {label}
+                        <input
+                          value={bookingDraft[key as keyof typeof bookingDraft] as string}
+                          onChange={(event) => setBookingDraft((current) => ({ ...current, [key]: event.target.value }))}
+                          className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-gold-500"
+                        />
+                      </label>
+                    ))}
+                    <label className="text-xs text-gray-400">
+                      Travellers
+                      <input type="number" min={1} value={bookingDraft.passengerCount} onChange={(event) => setBookingDraft((current) => ({ ...current, passengerCount: Number(event.target.value) }))} className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-gold-500" />
+                    </label>
+                    <label className="text-xs text-gray-400">
+                      Total price
+                      <input type="number" min={0} value={bookingDraft.totalPrice} onChange={(event) => setBookingDraft((current) => ({ ...current, totalPrice: Number(event.target.value) }))} className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-gold-500" />
+                    </label>
+                    <label className="text-xs text-gray-400 md:col-span-2">
+                      Internal/customer notes
+                      <textarea value={bookingDraft.notes} onChange={(event) => setBookingDraft((current) => ({ ...current, notes: event.target.value }))} rows={2} className="mt-1 w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-gold-500" />
+                    </label>
+                    <div className="flex gap-2 md:col-span-2">
+                      <button type="button" onClick={saveBookingEdit} className="inline-flex items-center gap-2 rounded-lg bg-green-500 px-3 py-2 text-sm font-semibold text-black"><Save className="h-4 w-4" /> Save booking</button>
+                      <button type="button" onClick={() => setEditingBookingId(null)} className="rounded-lg border border-white/10 px-3 py-2 text-sm text-gray-300">Cancel</button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-lg font-semibold">{booking.customerName}</p>
+                          <span className="rounded-full border border-gold-500/30 bg-gold-500/10 px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-gold-500">{booking.status}</span>
+                        </div>
+                        <p className="mt-1 text-sm text-gray-400">{booking.customerEmail} · {booking.customerPhone}</p>
+                        <p className="mt-2 text-sm text-white">{booking.matchTitle} · {booking.packageTitle}</p>
+                        <p className="text-xs text-gray-500">{booking.matchDate} · {booking.pickupName} · {booking.passengerCount} travellers · R{booking.totalPrice.toLocaleString()}</p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <button type="button" onClick={() => startBookingEdit(booking)} className="inline-flex items-center gap-1 rounded-lg border border-white/10 px-3 py-2 text-xs text-gold-400"><Edit3 className="h-3.5 w-3.5" /> Edit</button>
+                        {booking.status === 'pending' && <button type="button" onClick={() => handleBookingStatus(booking._id, 'approved')} className="inline-flex items-center gap-1 rounded-lg bg-green-500 px-3 py-2 text-xs font-semibold text-black"><Check className="h-3.5 w-3.5" /> Approve</button>}
+                        {booking.status !== 'declined' && booking.status !== 'cancelled' && <button type="button" onClick={() => handleBookingStatus(booking._id, 'declined')} className="inline-flex items-center gap-1 rounded-lg border border-red-400/30 px-3 py-2 text-xs text-red-300"><X className="h-3.5 w-3.5" /> Decline</button>}
+                        {booking.status === 'approved' && <button type="button" onClick={() => handleBookingStatus(booking._id, 'paid')} className="rounded-lg border border-green-400/30 px-3 py-2 text-xs text-green-300">Mark paid</button>}
+                      </div>
+                    </div>
+                    <div className="mt-4 flex flex-col gap-2 border-t border-white/10 pt-3 sm:flex-row sm:items-center">
+                      <Route className="h-4 w-4 text-gold-500" />
+                      <select
+                        value={booking.itineraryTemplateId ?? ''}
+                        onChange={async (event) => {
+                          const template = itineraryTemplates?.find((item) => item._id === event.target.value);
+                          if (template) await assignItinerary({ bookingId: booking._id, templateId: template._id, itinerary: template.items });
+                        }}
+                        className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-xs text-white outline-none focus:border-gold-500 sm:max-w-sm"
+                      >
+                        <option value="">Assign itinerary template…</option>
+                        {(itineraryTemplates ?? []).filter((template) => template.active).map((template) => <option key={template._id} value={template._id}>{template.name}</option>)}
+                      </select>
+                      <span className="text-xs text-gray-500">{booking.itinerary?.length ?? 0} itinerary stops assigned</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            ))}
+            {filteredBookings.length === 0 && <p className="rounded-2xl border border-dashed border-white/10 p-8 text-center text-sm text-gray-400">No bookings in this queue.</p>}
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-white/10 bg-white/5 p-6">
+          <div className="mb-5 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold-500">Consultant tools</p>
+              <h2 className="mt-2 text-2xl font-bold">Itinerary templates</h2>
+              <p className="mt-1 text-sm text-gray-400">Create repeatable routes, then assign them to approved bookings.</p>
+            </div>
+            <button type="button" onClick={() => setItineraryDraft(emptyItinerary)} className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs text-gold-400"><Plus className="h-4 w-4" /> New template</button>
+          </div>
+          <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+            <div className="space-y-3">
+              {(itineraryTemplates ?? []).map((template) => (
+                <div key={template._id} className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div><p className="font-semibold">{template.name}</p><p className="mt-1 text-xs text-gray-400">{template.description || 'No description'} · {template.items.length} stops</p></div>
+                    <div className="flex gap-2">
+                      <button type="button" onClick={() => setItineraryDraft({ id: template._id, name: template.name, description: template.description, items: template.items, active: template.active })} className="text-xs text-gold-400">Edit</button>
+                      <button type="button" onClick={() => deleteItineraryTemplate({ id: template._id })} className="text-xs text-red-300">Delete</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {!itineraryTemplates?.length && <p className="rounded-2xl border border-dashed border-white/10 p-6 text-sm text-gray-400">No itinerary templates yet.</p>}
+            </div>
+            <div className="space-y-3 rounded-2xl border border-white/10 bg-black/20 p-4">
+              <input value={itineraryDraft.name} onChange={(event) => setItineraryDraft((current) => ({ ...current, name: event.target.value }))} placeholder="Template name" className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-gold-500" />
+              <textarea value={itineraryDraft.description} onChange={(event) => setItineraryDraft((current) => ({ ...current, description: event.target.value }))} placeholder="Consultant notes and route description" rows={2} className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none focus:border-gold-500" />
+              {itineraryDraft.items.map((item, index) => (
+                <div key={`${index}-${item.time}`} className="grid gap-2 rounded-xl border border-white/10 p-3 md:grid-cols-[90px_1fr_1fr_auto]">
+                  <input value={item.time} onChange={(event) => setItineraryDraft((current) => ({ ...current, items: current.items.map((entry, itemIndex) => itemIndex === index ? { ...entry, time: event.target.value } : entry) }))} placeholder="09:00" className="rounded-lg border border-white/10 bg-black/30 px-2 py-2 text-sm text-white" />
+                  <input value={item.title} onChange={(event) => setItineraryDraft((current) => ({ ...current, items: current.items.map((entry, itemIndex) => itemIndex === index ? { ...entry, title: event.target.value } : entry) }))} placeholder="Activity" className="rounded-lg border border-white/10 bg-black/30 px-2 py-2 text-sm text-white" />
+                  <input value={item.location} onChange={(event) => setItineraryDraft((current) => ({ ...current, items: current.items.map((entry, itemIndex) => itemIndex === index ? { ...entry, location: event.target.value } : entry) }))} placeholder="Location" className="rounded-lg border border-white/10 bg-black/30 px-2 py-2 text-sm text-white" />
+                  <button type="button" onClick={() => setItineraryDraft((current) => ({ ...current, items: current.items.filter((_, itemIndex) => itemIndex !== index) }))} className="rounded-lg border border-red-400/20 px-2 text-red-300"><Trash2 className="h-4 w-4" /></button>
+                </div>
+              ))}
+              <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={() => setItineraryDraft((current) => ({ ...current, items: [...current.items, { ...emptyItineraryItem, time: `${String(9 + current.items.length).padStart(2, '0')}:00` }] }))} className="rounded-lg border border-white/10 px-3 py-2 text-xs text-gray-300"><Plus className="mr-1 inline h-3.5 w-3.5" /> Add stop</button>
+                <button type="button" onClick={saveItinerary} className="rounded-lg bg-green-500 px-3 py-2 text-xs font-semibold text-black"><Save className="mr-1 inline h-3.5 w-3.5" /> Save template</button>
+              </div>
+            </div>
+          </div>
+        </section>
 
         <div className="grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-8">
