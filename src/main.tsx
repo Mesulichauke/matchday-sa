@@ -7,6 +7,8 @@ import App from './App';
 import { convex } from './lib/convex';
 import './index.css';
 
+const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY?.trim();
+
 class AppErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { error: Error | null }
@@ -34,17 +36,27 @@ class AppErrorBoundary extends React.Component<
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <AppErrorBoundary>
-      <ClerkProvider
-        publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}
-        signInUrl={`${import.meta.env.BASE_URL}auth`}
-        afterSignOutUrl={import.meta.env.BASE_URL}
-      >
-        <ConvexProvider client={convex}>
-          <BrowserRouter basename={import.meta.env.BASE_URL}>
-            <App />
-          </BrowserRouter>
-        </ConvexProvider>
-      </ClerkProvider>
+      {clerkPublishableKey ? (
+        <ClerkProvider
+          publishableKey={clerkPublishableKey}
+          signInUrl={`${import.meta.env.BASE_URL}auth`}
+          afterSignOutUrl={import.meta.env.BASE_URL}
+        >
+          <AppProviders />
+        </ClerkProvider>
+      ) : (
+        <AppProviders />
+      )}
     </AppErrorBoundary>
   </React.StrictMode>
 );
+
+function AppProviders() {
+  const app = (
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <App />
+    </BrowserRouter>
+  );
+
+  return convex ? <ConvexProvider client={convex}>{app}</ConvexProvider> : app;
+}
