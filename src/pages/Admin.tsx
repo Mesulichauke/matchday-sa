@@ -150,6 +150,8 @@ export default function Admin() {
     notes: '',
     totalPrice: 0,
   });
+  const [operationError, setOperationError] = useState<string | null>(null);
+  const [operationNotice, setOperationNotice] = useState<string | null>(null);
 
   useEffect(() => {
     localStorage.setItem('matchday-sa-packages', JSON.stringify(packages));
@@ -186,7 +188,14 @@ export default function Admin() {
   }, [bookingFilter, bookings]);
 
   const handleBookingStatus = async (id: Id<'bookings'>, status: 'confirmed' | 'approved' | 'paid' | 'cancelled' | 'declined') => {
-    await updateBookingStatus({ id, status });
+    setOperationError(null);
+    setOperationNotice(null);
+    try {
+      await updateBookingStatus({ id, status });
+      setOperationNotice(`Booking ${status === 'approved' ? 'approved' : status}.`);
+    } catch (error) {
+      setOperationError(error instanceof Error ? error.message : 'The booking status could not be updated.');
+    }
   };
 
   const startBookingEdit = (booking: NonNullable<typeof bookings>[number]) => {
@@ -206,20 +215,34 @@ export default function Admin() {
 
   const saveBookingEdit = async () => {
     if (!editingBookingId) return;
-    await updateBooking({ id: editingBookingId, ...bookingDraft, passengerCount: Math.max(1, bookingDraft.passengerCount), totalPrice: Math.max(0, bookingDraft.totalPrice) });
-    setEditingBookingId(null);
+    setOperationError(null);
+    setOperationNotice(null);
+    try {
+      await updateBooking({ id: editingBookingId, ...bookingDraft, passengerCount: Math.max(1, bookingDraft.passengerCount), totalPrice: Math.max(0, bookingDraft.totalPrice) });
+      setEditingBookingId(null);
+      setOperationNotice('Booking details saved.');
+    } catch (error) {
+      setOperationError(error instanceof Error ? error.message : 'The booking could not be saved.');
+    }
   };
 
   const saveItinerary = async () => {
     if (!itineraryDraft.name.trim() || !itineraryDraft.items.some((item) => item.title.trim())) return;
-    await saveItineraryTemplate({
-      id: itineraryDraft.id,
-      name: itineraryDraft.name.trim(),
-      description: itineraryDraft.description.trim(),
-      items: itineraryDraft.items.filter((item) => item.title.trim()).map((item) => ({ ...item, title: item.title.trim(), location: item.location.trim(), notes: item.notes?.trim() || undefined })),
-      active: itineraryDraft.active,
-    });
-    setItineraryDraft(emptyItinerary);
+    setOperationError(null);
+    setOperationNotice(null);
+    try {
+      await saveItineraryTemplate({
+        id: itineraryDraft.id,
+        name: itineraryDraft.name.trim(),
+        description: itineraryDraft.description.trim(),
+        items: itineraryDraft.items.filter((item) => item.title.trim()).map((item) => ({ ...item, title: item.title.trim(), location: item.location.trim(), notes: item.notes?.trim() || undefined })),
+        active: itineraryDraft.active,
+      });
+      setItineraryDraft(emptyItinerary);
+      setOperationNotice('Itinerary template saved.');
+    } catch (error) {
+      setOperationError(error instanceof Error ? error.message : 'The itinerary template could not be saved.');
+    }
   };
 
   const resetToDefaults = () => {
@@ -302,7 +325,7 @@ export default function Admin() {
     return <RedirectToSignIn />;
   }
 
-  if (user.publicMetadata.role !== 'admin') {
+  if (user.publicMetadata?.role !== 'admin') {
     return (
       <main className="flex min-h-screen items-center justify-center bg-black px-4 text-white">
         <div className="max-w-md rounded-3xl border border-amber-500/30 bg-white/5 p-8 text-center">
@@ -344,7 +367,26 @@ export default function Admin() {
               Reset to defaults
             </button>
           </div>
+          <nav className="mt-5 flex flex-wrap gap-2 border-t border-white/10 pt-4" aria-label="Admin sections">
+            {[
+              ['Booking queue', '#booking-queue'],
+              ['Itineraries', '#itineraries'],
+              ['Packages', '#packages'],
+              ['Pickup points', '#pickups'],
+              ['Site settings', '#site-settings'],
+            ].map(([label, href]) => (
+              <a key={href} href={href} className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-xs font-medium text-gray-300 transition hover:border-gold-500/50 hover:text-gold-400">
+                {label}
+              </a>
+            ))}
+          </nav>
         </div>
+
+        {(operationError || operationNotice) && (
+          <div className={`rounded-2xl border px-4 py-3 text-sm ${operationError ? 'border-red-400/30 bg-red-500/10 text-red-200' : 'border-green-400/30 bg-green-500/10 text-green-200'}`} role={operationError ? 'alert' : 'status'}>
+            {operationError ?? operationNotice}
+          </div>
+        )}
 
         <div className="grid gap-4 md:grid-cols-3 xl:grid-cols-6">
           <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
@@ -373,7 +415,7 @@ export default function Admin() {
           </div>
         </div>
 
-        <section className="rounded-3xl border border-white/10 bg-white/5 p-6">
+        <section id="site-settings" className="rounded-3xl border border-white/10 bg-white/5 p-6">
           <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold-500">Operations</p>
@@ -458,7 +500,15 @@ export default function Admin() {
                         value={booking.itineraryTemplateId ?? ''}
                         onChange={async (event) => {
                           const template = itineraryTemplates?.find((item) => item._id === event.target.value);
-                          if (template) await assignItinerary({ bookingId: booking._id, templateId: template._id, itinerary: template.items });
+                          if (!template) return;
+                          setOperationError(null);
+                          setOperationNotice(null);
+                          try {
+                            await assignItinerary({ bookingId: booking._id, templateId: template._id, itinerary: template.items });
+                            setOperationNotice('Itinerary assigned to booking.');
+                          } catch (error) {
+                            setOperationError(error instanceof Error ? error.message : 'The itinerary could not be assigned.');
+                          }
                         }}
                         className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-xs text-white outline-none focus:border-gold-500 sm:max-w-sm"
                       >
@@ -475,7 +525,7 @@ export default function Admin() {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-white/10 bg-white/5 p-6">
+        <section id="booking-queue" className="rounded-3xl border border-white/10 bg-white/5 p-6">
           <div className="mb-5 flex items-center justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold-500">Consultant tools</p>
@@ -492,7 +542,22 @@ export default function Admin() {
                     <div><p className="font-semibold">{template.name}</p><p className="mt-1 text-xs text-gray-400">{template.description || 'No description'} · {template.items.length} stops</p></div>
                     <div className="flex gap-2">
                       <button type="button" onClick={() => setItineraryDraft({ id: template._id, name: template.name, description: template.description, items: template.items, active: template.active })} className="text-xs text-gold-400">Edit</button>
-                      <button type="button" onClick={() => deleteItineraryTemplate({ id: template._id })} className="text-xs text-red-300">Delete</button>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          setOperationError(null);
+                          setOperationNotice(null);
+                          try {
+                            await deleteItineraryTemplate({ id: template._id });
+                            setOperationNotice('Itinerary template deleted.');
+                          } catch (error) {
+                            setOperationError(error instanceof Error ? error.message : 'The itinerary template could not be deleted.');
+                          }
+                        }}
+                        className="text-xs text-red-300"
+                      >
+                        Delete
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -520,7 +585,7 @@ export default function Admin() {
 
         <div className="grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-8">
-            <section className="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <section id="itineraries" className="rounded-3xl border border-white/10 bg-white/5 p-6">
               <div className="mb-4 flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold-500/10 text-gold-500">
                   <ShieldCheck className="h-5 w-5" />
@@ -564,7 +629,7 @@ export default function Admin() {
               </div>
             </section>
 
-            <section className="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <section id="packages" className="rounded-3xl border border-white/10 bg-white/5 p-6">
               <div className="mb-4 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gold-500/10 text-gold-500">
@@ -678,7 +743,7 @@ export default function Admin() {
           </div>
 
           <div className="space-y-8">
-            <section className="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <section id="pickups" className="rounded-3xl border border-white/10 bg-white/5 p-6">
               <div className="mb-4 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/10 text-green-500">
