@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { Check, LogOut, ShieldCheck, X } from 'lucide-react';
 import { apiRequest, useAuth } from '@/lib/auth';
+import { apiUrl } from '@/lib/api';
 
 type Consultant = {
   id: number; name: string; email: string; phone: string; region: string; bio: string;
@@ -22,8 +23,8 @@ export default function Admin() {
   const load = async () => {
     try {
       const [consultantData, bookingData] = await Promise.all([
-        apiRequest<{ consultants: Consultant[] }>('/api/admin/consultants'),
-        apiRequest<{ bookings: Booking[] }>('/api/bookings'),
+        apiRequest<{ consultants: Consultant[] }>(apiUrl('/api/admin/consultants')),
+        apiRequest<{ bookings: Booking[] }>(apiUrl('/api/bookings')),
       ]);
       setConsultants(consultantData.consultants);
       setBookings(bookingData.bookings);
@@ -47,7 +48,7 @@ export default function Admin() {
     setError('');
     setNotice('');
     try {
-      await apiRequest(`/api/admin/consultants/${id}/${action}`, {
+      await apiRequest(apiUrl(`/api/admin/consultants/${id}/${action}`), {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}),
       });
       setNotice(`Consultant ${action === 'reject' ? 'rejected' : `${action}d`}.`);
@@ -58,7 +59,7 @@ export default function Admin() {
   };
   const updateBookingStatus = async (id: string, status: 'approved' | 'declined' | 'paid') => {
     try {
-      await apiRequest(`/api/bookings/${id}/status`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
+      await apiRequest(apiUrl(`/api/bookings/${id}/status`), { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
       setNotice(`Booking ${status}.`);
       await load();
     } catch (requestError) {

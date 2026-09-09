@@ -11,6 +11,8 @@ Matchday SA uses a self-hosted Express API and SQLite database for authenticatio
 
 `npm run dev:full` starts both processes when `concurrently` is available. Vite proxies `/api` to `http://localhost:3001`; set `APP_ORIGIN` to the public frontend origin in production. Set `NODE_ENV=production` to enable the Secure session cookie.
 
+For GitHub Pages, deploy `server/index.mjs` and its SQLite database to your own HTTPS VPS. Set the GitHub Actions repository variable `VITE_API_BASE_URL` to that API origin (for example, `https://api.example.com`) and configure the API's `APP_ORIGIN` to `https://mesulichauke.github.io`. GitHub Pages cannot run the Express API itself.
+
 The first API start creates the administrator from `ADMIN_*` only when that email is not already present. Passwords are salted `scrypt` hashes, sessions are random tokens stored server-side in SQLite, and mutating API requests are restricted to configured same-origin requests.
 
 Consultants apply at `/auth?mode=signup`, wait for approval, then sign in. Administrators use `/auth?mode=admin` to review, approve, reject, or revoke consultant applications.

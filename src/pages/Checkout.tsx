@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, CreditCard, MapPin, ShieldCheck, Users } from 'lucide-react';
+import { apiUrl } from '@/lib/api';
 
 const readStoredValue = <T,>(key: string, fallback: T): T => {
   const raw = localStorage.getItem(key);
@@ -74,7 +75,7 @@ export default function Checkout() {
     };
 
     try {
-      const response = await fetch('/api/bookings', {
+      const response = await fetch(apiUrl('/api/bookings'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

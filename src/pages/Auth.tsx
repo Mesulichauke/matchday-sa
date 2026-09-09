@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
+import { apiUrl } from '@/lib/api';
 
 type View = 'login' | 'signup' | 'admin' | 'pending' | 'rejected';
 
@@ -20,7 +21,7 @@ export default function Auth() {
     setMessage(null);
     try {
       if (view === 'signup') {
-        const response = await fetch('/api/auth/consultant/signup', {
+        const response = await fetch(apiUrl('/api/auth/consultant/signup'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
