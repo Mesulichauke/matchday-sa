@@ -11,6 +11,7 @@ const port = Number(process.env.PORT || 3001);
 const databasePath = process.env.DATABASE_PATH || path.join(__dirname, 'matchday.sqlite');
 const sessionTtlMs = 7 * 24 * 60 * 60 * 1000;
 const cookieName = 'matchday_session';
+const cookieSameSite = (process.env.COOKIE_SAMESITE || 'lax').toLowerCase();
 const database = new DatabaseSync(databasePath);
 
 database.exec(`
@@ -96,7 +97,7 @@ function setSession(res, userId) {
   const token = crypto.randomBytes(32).toString('hex');
   statement('INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)').run(token, userId, Date.now() + sessionTtlMs);
   const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
-  res.setHeader('Set-Cookie', `${cookieName}=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${sessionTtlMs / 1000}${secure}`);
+  res.setHeader('Set-Cookie', `${cookieName}=${token}; Path=/; HttpOnly; SameSite=${cookieSameSite}; Max-Age=${sessionTtlMs / 1000}${secure}`);
 }
 
 function clearSession(res, token) {
@@ -147,6 +148,19 @@ function sameOrigin(req, res, next) {
   if (req.method !== 'GET' && req.headers['content-type'] && !req.headers['content-type'].includes('application/json')) {
     return jsonError(res, 415, 'JSON requests are required.');
   }
+
+  function cors(req, res, next) {
+    const origin = req.get('origin');
+    const configured = process.env.APP_ORIGIN?.replace(/\/$/, '');
+    if (origin && configured && origin === configured) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+      res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,OPTIONS');
+    }
+    if (req.method === 'OPTIONS') return res.sendStatus(204);
+    return next();
+  }
   return next();
 }
 
@@ -174,6 +188,7 @@ function bootstrapAdmin() {
 bootstrapAdmin();
 
 app.use(express.json({ limit: '100kb' }));
+app.use(cors);
 app.use(sameOrigin);
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
