@@ -1,13 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { ConvexProvider } from 'convex/react';
-import { ClerkProvider } from '@clerk/clerk-react';
 import App from './App';
-import { convex } from './lib/convex';
+import { AuthProvider } from './lib/auth';
 import './index.css';
 
-const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY?.trim();
 const spaRedirectKey = 'matchday-spa-redirect';
 
 const pendingRedirect = sessionStorage.getItem(spaRedirectKey);
@@ -59,27 +56,17 @@ class AppErrorBoundary extends React.Component<
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <AppErrorBoundary>
-      {clerkPublishableKey ? (
-        <ClerkProvider
-          publishableKey={clerkPublishableKey}
-          signInUrl={`${import.meta.env.BASE_URL}auth`}
-          afterSignOutUrl={import.meta.env.BASE_URL}
-        >
-          <AppProviders />
-        </ClerkProvider>
-      ) : (
-        <AppProviders />
-      )}
+      <AppProviders />
     </AppErrorBoundary>
   </React.StrictMode>
 );
 
 function AppProviders() {
   return (
-    <ConvexProvider client={convex}>
+    <AuthProvider>
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <App />
       </BrowserRouter>
-    </ConvexProvider>
+    </AuthProvider>
   );
 }

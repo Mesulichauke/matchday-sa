@@ -1,8 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
-import { useMutation } from 'convex/react';
 import { ArrowLeft, CheckCircle2, CreditCard, MapPin, ShieldCheck, Users } from 'lucide-react';
-import { api } from '../../convex/_generated/api';
 
 const readStoredValue = <T,>(key: string, fallback: T): T => {
   const raw = localStorage.getItem(key);
@@ -18,7 +16,6 @@ export default function Checkout() {
   const navigate = useNavigate();
   const location = useLocation();
   const booking = (location.state as { booking?: any } | null)?.booking ?? null;
-  const createBooking = useMutation(api.bookings.create);
 
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
@@ -77,8 +74,16 @@ export default function Checkout() {
     };
 
     try {
-      const orderId = await createBooking(payload);
-      setSavedOrderId(String(orderId));
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'We could not reserve your seats.');
+      const orderId = result.id as string;
+      setSavedOrderId(orderId);
 
       const existing = readStoredValue<Array<Record<string, any>>>('matchday-sa-bookings', []);
       localStorage.setItem('matchday-sa-bookings', JSON.stringify([

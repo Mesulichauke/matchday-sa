@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useQuery } from 'convex/react';
 import {
   ArrowLeft,
   Calendar,
@@ -15,7 +14,6 @@ import { sundownsFixtures } from '@/data/sundownsFixtures';
 import { rugbyFixtures } from '@/data/rugbyFixtures';
 import { defaultPickupPoints, mergePickupPoints, type PickupPoint } from '@/data/pickupPoints';
 import { buildTripPlan, minimumTripPassengers } from '@/data/tripGrouping';
-import { api } from '../../convex/_generated/api';
 
 type Fixture = {
   id: string;
@@ -389,12 +387,7 @@ export default function EventDetail() {
   const [paymentMethod, setPaymentMethod] = useState<'full' | 'bnpl'>('full');
   const [storedPackages, setStoredPackages] = useState<AdminPackage[]>(() => readStoredValue('matchday-sa-packages', []));
   const [storedPickups, setStoredPickups] = useState<AdminPickup[]>(() => mergePickupPoints(readStoredValue('matchday-sa-pickups', defaultPickupPoints)));
-  const tripBookings = useQuery(
-    api.bookings.forTrip,
-    selectedMatch && selectedPackage
-      ? { matchId: String(selectedMatch.id), packageId: selectedPackage.id }
-      : 'skip',
-  );
+  const [tripBookings] = useState<Array<{ pickupProvince: string; passengerCount: number }>>([]);
 
   const routeFixture = useMemo(() => {
     if (!id) return null;

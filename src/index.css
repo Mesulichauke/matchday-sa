@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+.auth-input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  background: rgb(0 0 0 / 0.3);
+  padding: 0.75rem 1rem;
+  color: white;
+  outline: none;
+}
+.auth-input:focus { border-color: #ffd700; }
+
 :root {
   font-family: Inter, system-ui, sans-serif;
   color: #0f172a;
