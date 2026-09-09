@@ -11,8 +11,8 @@ export default function TownshipTourCard({ tour }: Props) {
     <article className="rounded-2xl border border-white/10 bg-white/5 p-6 transition-colors hover:border-gold-500/50">
       <div className="-mx-6 -mt-6 mb-5 h-40 overflow-hidden rounded-t-2xl">
         <img
-          src={`${import.meta.env.BASE_URL}images/township-tour-card.jpg`}
-          alt="Friends enjoying a township day out together"
+          src={`${import.meta.env.BASE_URL}images/township-experience-card.jpg`}
+          alt="Colorful Soweto signposts pointing to local landmarks"
           className="h-full w-full object-cover"
         />
         <div className="-mt-40 h-40 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />

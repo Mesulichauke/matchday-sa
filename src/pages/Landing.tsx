@@ -41,7 +41,7 @@ const categories = [
     subtitle: 'From R999',
     description: 'Cultural tours that blend local stories, food, music, and authentic township experiences.',
     href: '/tours',
-    image: `${import.meta.env.BASE_URL}images/township-tour-card.jpg`,
+    image: `${import.meta.env.BASE_URL}images/township-experience-card.jpg`,
     accent: 'bg-[#d4f2df] text-[#0c1014]',
   },
   {
@@ -79,7 +79,7 @@ const heroSlides = [
     title: 'Township Raw Experience',
     label: 'Tour Experience',
     price: 'R999',
-    image: `${import.meta.env.BASE_URL}images/township-tour-card.jpg`,
+    image: `${import.meta.env.BASE_URL}images/township-experience-hero.jpg`,
     description: 'A culture-rich township route with food, stories, and local insight from the community.',
   },
   {
