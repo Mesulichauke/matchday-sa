@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: matchday-sa-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm run api
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: APP_ORIGIN
+        value: https://mesulichauke.github.io
+      - key: COOKIE_SAMESITE
+        value: none
+      - key: ADMIN_NAME
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
