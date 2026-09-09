@@ -25,7 +25,7 @@ const categories = [
     subtitle: 'From R299',
     description: 'Home and away fixtures with city transfers, local hosts, and stadium-ready support.',
     href: '/football',
-    image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=900&q=80',
+    image: `${import.meta.env.BASE_URL}images/football-matchday.jpg`,
     accent: 'bg-[#f8d57f] text-[#0c1014]',
   },
   {
@@ -33,7 +33,7 @@ const categories = [
     subtitle: 'From R299',
     description: 'Big test matches and derby weekends with premium routes and fan-first logistics.',
     href: '/rugby',
-    image: 'https://images.unsplash.com/photo-1518604666860-9ed391f76460?auto=format&fit=crop&w=900&q=80',
+    image: `${import.meta.env.BASE_URL}images/rugby-ball-hero.jpg`,
     accent: 'bg-[#dfeae4] text-[#0c1014]',
   },
   {
@@ -49,7 +49,7 @@ const categories = [
     subtitle: 'From R1,599',
     description: 'Custom packages for staff outings, leadership teams, and company social experiences.',
     href: '/corporate',
-    image: 'https://images.unsplash.com/photo-1552667466-07770ae110d0?auto=format&fit=crop&w=900&q=80',
+    image: `${import.meta.env.BASE_URL}images/corporate-team-day.jpg`,
     accent: 'bg-[#fef2d1] text-[#0c1014]',
   },
 ];
@@ -61,7 +61,7 @@ const heroSlides = [
     title: 'Soweto Derby Weekend',
     label: 'Matchday Special',
     price: 'R449',
-    image: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1600&q=80',
+    image: `${import.meta.env.BASE_URL}images/football-matchday.jpg`,
     description: 'Experience the heartbeat of the derby with local guides, food stops, and stadium transport.',
   },
   {
@@ -70,7 +70,7 @@ const heroSlides = [
     title: 'Springboks vs All Blacks',
     label: 'Rugby Weekend',
     price: 'R549',
-    image: 'https://images.unsplash.com/photo-1518604666860-9ed391f76460?auto=format&fit=crop&w=1600&q=80',
+    image: `${import.meta.env.BASE_URL}images/rugby-ball-hero.jpg`,
     description: 'Catch the action with a ready-to-roll route, local host support, and entry support.',
   },
   {
@@ -79,7 +79,7 @@ const heroSlides = [
     title: 'Township Raw Experience',
     label: 'Tour Experience',
     price: 'R999',
-    image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1600&q=80',
+    image: `${import.meta.env.BASE_URL}images/township-tour-card.jpg`,
     description: 'A culture-rich township route with food, stories, and local insight from the community.',
   },
   {
@@ -88,7 +88,7 @@ const heroSlides = [
     title: 'Corporate Team Day',
     label: 'Team Building',
     price: 'R1,599',
-    image: 'https://images.unsplash.com/photo-1552667466-07770ae110d0?auto=format&fit=crop&w=1600&q=80',
+    image: `${import.meta.env.BASE_URL}images/corporate-team-day.jpg`,
     description: 'Structured team experiences built for departments, brands, and leadership groups.',
   },
 ];

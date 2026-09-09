@@ -57,6 +57,14 @@ export default function Rugby() {
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {filteredFixtures.map((fixture) => (
             <div key={fixture.id} className="rounded-2xl border border-white/10 bg-white/5 p-6">
+              <div className="-mx-6 -mt-6 mb-5 h-32 overflow-hidden rounded-t-2xl">
+                <img
+                  src={`${import.meta.env.BASE_URL}images/rugby-ball-hero.jpg`}
+                  alt="Rugby ball on the pitch"
+                  className="h-full w-full object-cover"
+                />
+                <div className="-mt-32 h-32 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
+              </div>
               <div className="mb-4 flex items-center justify-between">
                 <span className="rounded-full bg-gold-500/15 px-3 py-1 text-xs font-medium text-gold-500">Rugby</span>
                 <span className="text-xs text-gray-400">{fixture.totalSpots} spots left</span>

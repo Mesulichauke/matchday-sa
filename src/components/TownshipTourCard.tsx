@@ -9,6 +9,14 @@ export default function TownshipTourCard({ tour }: Props) {
   const [expanded, setExpanded] = useState(false);
   return (
     <article className="rounded-2xl border border-white/10 bg-white/5 p-6 transition-colors hover:border-gold-500/50">
+      <div className="-mx-6 -mt-6 mb-5 h-40 overflow-hidden rounded-t-2xl">
+        <img
+          src={`${import.meta.env.BASE_URL}images/township-tour-card.jpg`}
+          alt="Friends enjoying a township day out together"
+          className="h-full w-full object-cover"
+        />
+        <div className="-mt-40 h-40 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+      </div>
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex flex-wrap gap-2"><span className="rounded-full bg-gold-500/15 px-3 py-1 text-xs font-medium text-gold-500">{tour.province}</span><span className="rounded-full bg-green-500/15 px-3 py-1 text-xs font-medium text-green-400">{tour.duration} · 8 hours</span></div>
