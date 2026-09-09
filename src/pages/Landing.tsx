@@ -41,7 +41,7 @@ const categories = [
     subtitle: 'From R999',
     description: 'Cultural tours that blend local stories, food, music, and authentic township experiences.',
     href: '/tours',
-    image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=900&q=80',
+    image: `${import.meta.env.BASE_URL}images/township-tour-card.jpg`,
     accent: 'bg-[#d4f2df] text-[#0c1014]',
   },
   {

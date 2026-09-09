@@ -21,7 +21,7 @@ export default function Rugby() {
         <section
           className="relative mb-10 overflow-hidden rounded-[32px] border border-white/10 bg-[#0c1014] text-white shadow-2xl"
           style={{
-            backgroundImage: `linear-gradient(90deg, rgba(7,10,12,0.92) 0%, rgba(7,10,12,0.68) 44%, rgba(16,74,42,0.3) 100%), url('${import.meta.env.BASE_URL}images/rugby-matchday-hero.jpg')`,
+            backgroundImage: `linear-gradient(90deg, rgba(7,10,12,0.88) 0%, rgba(7,10,12,0.54) 44%, rgba(16,74,42,0.22) 100%), url('${import.meta.env.BASE_URL}images/rugby-ball-hero.jpg')`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
           }}
